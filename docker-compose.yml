@@ -1,0 +1,98 @@
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: auction-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Password123
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong@Password123' -Q 'SELECT 1' -C -b"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - auction-network
+
+  # RabbitMQ Message Queue
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: auction-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - auction-network
+
+  # Bidding Service
+  bidding-service:
+    build:
+      context: ./AuctionBiddingPlatform
+      dockerfile: Dockerfile
+    container_name: auction-bidding-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=Server=sqlserver;Database=AuctionDb;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True;
+      - RabbitMQ__Host=rabbitmq
+      - JwtSettings__Issuer=AuctionAPI
+      - JwtSettings__Audience=AuctionAPIUsers
+      - JwtSettings__SecretKey=ThisIsAReallyStrongSecretKey123!
+      - Internal__ApiKey=super-secret-internal-key
+    ports:
+      - "5000:80"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - auction-network
+    restart: on-failure
+
+  # Winner Notification Service
+  notification-service:
+    build:
+      context: .
+      dockerfile: ./WinnerNotificationService/Dockerfile
+    container_name: auction-notification-service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - RabbitMQ__Host=rabbitmq
+      - BiddingService__BaseUrl=http://bidding-service:80/
+      - Internal__ApiKey=super-secret-internal-key
+    ports:
+      - "5001:80"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      bidding-service:
+        condition: service_started
+    networks:
+      - auction-network
+    restart: on-failure
+
+networks:
+  auction-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+  rabbitmq-data:

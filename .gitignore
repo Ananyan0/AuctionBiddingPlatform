@@ -1,0 +1,27 @@
+# .NET build output
+bin/
+obj/
+
+# User settings
+*.user
+*.suo
+*.vs/
+
+# Logs
+*.log
+
+# OS-specific files
+Thumbs.db
+.DS_Store
+
+# Docker artifacts
+*.pid
+.env
+docker-data/
+
+# JetBrains / VS Code
+.idea/
+.vscode/
+
+# Build cache
+*.cache
