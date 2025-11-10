@@ -18,4 +18,21 @@ public class AuctionItem
     public bool IsClosed { get; set; }
 
     public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+
+
+
+    public void ValidateBid(decimal amount)
+    {
+        if (IsClosed)
+            throw new InvalidOperationException("Auction is already closed.");
+
+        if (EndsAtUtc < DateTime.UtcNow)
+            throw new InvalidOperationException("Auction has expired.");
+
+        var current = HighestBid ?? StartingPrice;
+
+        if (amount <= current)
+            throw new ArgumentException(
+                $"Bid must be higher than the current highest price ({current:F2}).");
+    }
 }

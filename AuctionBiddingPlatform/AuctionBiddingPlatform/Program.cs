@@ -79,6 +79,8 @@ builder.Services.AddScoped<IAuctionItemService, AuctionItemService>();
 builder.Services.AddScoped<IBidService, BidService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuctionQueryService, AuctionQueryService>();
+builder.Services.AddScoped<IBidValidationService, BidValidationService>();
+
 
 
 // Messaging
@@ -142,6 +144,7 @@ app.UseHttpsRedirection();
 
 // 🔹 Authentication & Authorization must be in this order
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 // 🔹 Custom Middleware for Bid Validation (runs after user is authenticated)

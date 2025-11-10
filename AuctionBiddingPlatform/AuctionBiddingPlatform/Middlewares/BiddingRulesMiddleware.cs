@@ -1,98 +1,47 @@
 ﻿using AuctionBiddingPlatform.Core.Interfaces.IRepositories;
+using AuctionBiddingPlatform.Core.Interfaces.IServices;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
-namespace AuctionBiddingPlatform.Middlewares
+namespace AuctionBiddingPlatform.Middlewares;
+
+public class BiddingRulesMiddleware
 {
-    public class BiddingRulesMiddleware
+    private readonly RequestDelegate _next;
+
+    public BiddingRulesMiddleware(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<BiddingRulesMiddleware> _logger;
+        _next = next;
+    }
 
-        public BiddingRulesMiddleware(RequestDelegate next, ILogger<BiddingRulesMiddleware> logger)
+    public async Task InvokeAsync(HttpContext context, IBidValidationService validator)
+    {
+        if (context.Request.Path.StartsWithSegments("/api/bids") &&
+               context.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
         {
-            _next = next;
-            _logger = logger;
-        }
+            var segments = context.Request.Path.Value!.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-        public async Task InvokeAsync(HttpContext context, IUnitOfWork unitOfWork)
-        {
-            // Apply only to POST /api/bids/{itemId}
-            if (context.Request.Path.StartsWithSegments("/api/bids") &&
-                context.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
+
+            if (segments.Length >= 3 && int.TryParse(segments[2], out var itemId))
             {
-                try
-                {
-                    var segments = context.Request.Path.Value?.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                context.Request.EnableBuffering();
+                using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
+                var body = await reader.ReadToEndAsync();
+                context.Request.Body.Position = 0;
 
-                    // Expect route: /api/bids/{itemId}
-                    if (segments is { Length: >= 3 } && int.TryParse(segments[2], out var itemId))
-                    {
-                        var auction = await unitOfWork.AuctionItems.GetByIdAsync(itemId);
-                        if (auction == null)
-                            throw new KeyNotFoundException("Auction item not found.");
+                var data = JsonSerializer.Deserialize<BidBody>(body);
+                if (data == null)
+                    throw new ArgumentException("Invalid request body.");
 
-                        if (auction.IsClosed)
-                            throw new InvalidOperationException("Auction is already closed.");
-
-                        if (auction.EndsAtUtc < DateTime.UtcNow)
-                            throw new InvalidOperationException("Auction has expired.");
-
-                        // ✅ Enable body buffering so controller can also read the body
-                        context.Request.EnableBuffering();
-
-                        using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
-                        var body = await reader.ReadToEndAsync();
-                        context.Request.Body.Position = 0; // Reset position for next middleware
-
-                        if (!string.IsNullOrWhiteSpace(body))
-                        {
-                            try
-                            {
-                                var json = JsonSerializer.Deserialize<BidBody>(body, new JsonSerializerOptions
-                                {
-                                    PropertyNameCaseInsensitive = true
-                                });
-
-                                if (json != null)
-                                {
-                                    var currentHighest = auction.HighestBid ?? auction.StartingPrice;
-                                    var basis = auction.HighestBid.HasValue ? "current highest bid" : "starting price";
-
-                                    if (json.Amount <= currentHighest)
-                                        throw new ArgumentException(
-                                            $"Bid must be higher than the {basis} ({currentHighest:F2}).");
-                                }
-                            }
-                            catch (JsonException ex)
-                            {
-                                _logger.LogError(ex, "Failed to parse JSON bid body.");
-                                throw new ArgumentException("Invalid JSON format in bid request.");
-                            }
-                        }
-                        else
-                        {
-                            throw new ArgumentException("Request body cannot be empty.");
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Invalid bid route format.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Bidding validation failed.");
-                    throw;
-                }
+                await validator.ValidateAsync(itemId, data.Amount);
             }
-
-            // Continue the pipeline
-            await _next(context);
         }
 
-        private class BidBody
-        {
-            public decimal Amount { get; set; }
-        }
+        await _next(context);
+    }
+
+    private class BidBody
+    {
+        public decimal Amount { get; set; }
     }
 }
