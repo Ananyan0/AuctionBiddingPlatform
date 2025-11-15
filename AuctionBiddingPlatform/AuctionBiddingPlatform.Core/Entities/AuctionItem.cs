@@ -1,4 +1,5 @@
 ﻿using AuctionBiddingPlatform.Core.Enums;
+using AuctionBiddingPlatform.Core.Middlewares;
 
 namespace AuctionBiddingPlatform.Core.Entities;
 
@@ -21,18 +22,87 @@ public class AuctionItem
 
 
 
+
+    public void IsStartingPriceValid(decimal amount)
+    {
+        if (amount <= 0)
+            throw new ArgumentException("Starting price must be higher then 0");
+    }
+
+    public void IsDateValid(DateTime startDate)
+    {
+        if(startDate.AddMinutes(1) < DateTime.UtcNow)
+            throw new ArgumentException("The date must be in the future");
+    }
+
+
+    public void IsClsoed(bool isClosed)
+    {
+        if (isClosed)
+            throw new ArgumentException("The auction is closed");
+    }
+
+    private decimal GetCurrentHighestBid()
+    {
+        if (Bids == null || !Bids.Any())
+        {
+            return StartingPrice;
+        }
+        return Bids.Max(b => b.Amount);
+    }
+
+
+    public void RecalculateHighestBid()
+    {
+        if (Bids != null && Bids.Any())
+        {
+            var highestBid = Bids.OrderByDescending(b => b.Amount)
+                                  .ThenByDescending(b => b.PlacedAtUtc)
+                                  .First();
+            HighestBid = highestBid.Amount;
+            HighestBidUserId = highestBid.UserId;
+        }
+        else
+        {
+            HighestBid = null;
+            HighestBidUserId = null;
+        }
+    }
+
     public void ValidateBid(decimal amount)
     {
         if (IsClosed)
-            throw new InvalidOperationException("Auction is already closed.");
+            throw new DomainException("Auction is already closed.");
 
         if (EndsAtUtc < DateTime.UtcNow)
-            throw new InvalidOperationException("Auction has expired.");
+            throw new DomainException("Auction has expired.");
 
-        var current = HighestBid ?? StartingPrice;
+        var current = GetCurrentHighestBid();
+
 
         if (amount <= current)
-            throw new ArgumentException(
+            throw new DomainException(
                 $"Bid must be higher than the current highest price ({current:F2}).");
+    }
+
+
+    public void PlaceBid(int userId, decimal amount)
+    {
+        var bid = Bid.Create(Id, userId, amount);
+        Bids.Add(bid);
+
+
+        HighestBid = amount;
+        HighestBidUserId = userId;
+    }
+
+
+    public void CreateAuction(DateTime auctionStartDate)
+    {
+        IsDateValid(auctionStartDate);
+
+        StartsAtUtc = auctionStartDate;
+        EndsAtUtc = auctionStartDate.AddHours(24);
+        IsClosed = false;
     }
 }

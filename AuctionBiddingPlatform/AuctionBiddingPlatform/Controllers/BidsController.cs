@@ -27,19 +27,9 @@ public class BidsController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst("id")!.Value);
 
-        // 🔹 Map incoming DTO to entity (for clarity)
-        var bidEntity = _mapper.Map<Bid>(dto);
-        bidEntity.AuctionItemId = itemId;
-        bidEntity.UserId = userId;
-        bidEntity.PlacedAtUtc = DateTime.UtcNow;
+        var result = await _bidService.PlaceBidAsync(itemId, userId, dto.Amount);
 
-        // 🔹 Call service (non-generic Task)
-        await _bidService.PlaceBidAsync(itemId, userId, dto.Amount);
-
-        // 🔹 Map back to response DTO
-        var response = _mapper.Map<BidResponseDto>(bidEntity);
-
-        return Ok(response);
+        return Ok(result);
     }
 
 
@@ -49,9 +39,6 @@ public class BidsController : ControllerBase
     {
         var bids = await _bidService.GetUserBidsAsync(userId);
 
-
         return bids;
     }
-
-
 }

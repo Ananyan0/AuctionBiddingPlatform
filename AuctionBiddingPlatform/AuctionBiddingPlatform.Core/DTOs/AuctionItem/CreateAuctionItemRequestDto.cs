@@ -6,5 +6,4 @@ public class CreateAuctionItemRequestDto
     public string Description { get; set; } = string.Empty;
     public decimal StartingPrice { get; set; }
     public DateTime StartsAtUtc { get; set; }
-    public DateTime EndsAtUtc { get; set; }
 }

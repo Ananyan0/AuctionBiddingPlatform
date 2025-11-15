@@ -1,4 +1,5 @@
-﻿using AuctionBiddingPlatform.Core.DTOs.AuctionItem;
+﻿using Auction.Contracts.Events;
+using AuctionBiddingPlatform.Core.DTOs.AuctionItem;
 using AuctionBiddingPlatform.Core.DTOs.Bid;
 using AuctionBiddingPlatform.Core.Entities;
 using AutoMapper;
@@ -19,5 +20,9 @@ public class MappingProfile : Profile
 
         CreateMap<AuctionItem, AuctionItemListItemDto>()
             .ForMember(d => d.Category, o => o.MapFrom(s => s.Category.ToString()));
+
+        CreateMap<AuctionItem, AuctionClosedEvent>()
+            .ForMember(dest => dest.AuctionItemId, opt => opt.MapFrom(src => src.Id));
+
     }
 }

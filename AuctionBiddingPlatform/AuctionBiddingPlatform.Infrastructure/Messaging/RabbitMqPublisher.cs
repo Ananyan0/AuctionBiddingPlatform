@@ -19,7 +19,7 @@ public class RabbitMqPublisher : IMessagePublisher
         };
     }
 
-    public async Task PublishAuctionClosedAsync(AuctionClosedEvent ev)
+    public void PublishAuctionClosedAsync(AuctionClosedEvent ev)
     {
         using var connection = _factory.CreateConnection();
         using var channel = connection.CreateModel();

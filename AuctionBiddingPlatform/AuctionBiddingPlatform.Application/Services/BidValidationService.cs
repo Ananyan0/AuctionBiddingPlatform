@@ -15,8 +15,7 @@ public class BidValidationService : IBidValidationService
 
     public async Task ValidateAsync(int itemId, decimal amount)
     {
-        var auction = await _unitOfWork.AuctionItems.GetByIdAsync(itemId);
-
+        var auction = await _unitOfWork.AuctionItems.GetByIdWithBidsAsync(itemId);
         if (auction == null)
             throw new KeyNotFoundException("Auction item not found.");
 

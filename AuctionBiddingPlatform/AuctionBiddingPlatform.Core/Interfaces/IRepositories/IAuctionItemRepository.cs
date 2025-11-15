@@ -4,6 +4,7 @@ namespace AuctionBiddingPlatform.Core.Interfaces.IRepositories;
 
 public interface IAuctionItemRepository : IBaseRepository<AuctionItem>
 {
+    Task<AuctionItem?> GetByIdWithBidsAsync(int id);
     Task<IEnumerable<AuctionItem>> GetActiveAuctionsAsync();
 
     IQueryable<AuctionItem> Query(); 

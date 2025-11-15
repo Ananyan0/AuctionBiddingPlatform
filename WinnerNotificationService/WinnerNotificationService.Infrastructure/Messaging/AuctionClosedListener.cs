@@ -62,7 +62,6 @@ namespace WinnerNotificationService.Infrastructure.Messaging
 
             channel.BasicConsume("auction-closed", autoAck: true, consumer);
 
-            // ✅ This keeps the service running and prevents exit
             await Task.Delay(-1, stoppingToken);
         }
     }

@@ -1,10 +1,11 @@
-﻿using AuctionBiddingPlatform.Core.Entities;
+﻿using AuctionBiddingPlatform.Core.DTOs.Bid;
+using AuctionBiddingPlatform.Core.Entities;
 
 namespace AuctionBiddingPlatform.Core.Interfaces.IServices;
 
 
 public interface IBidService
 {
-    Task PlaceBidAsync(int itemId, int userId, decimal amount);
+    Task<BidResponseDto> PlaceBidAsync(int itemId, int userId, decimal amount);
     Task<IEnumerable<Bid>> GetUserBidsAsync(int userId);
 }

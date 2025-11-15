@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using AuctionBiddingPlatform.Core.Middlewares;
+using System.Net;
 using System.Text.Json;
 
 namespace AuctionBiddingPlatform.Middlewares;
@@ -27,11 +28,13 @@ public class ExceptionHandlingMiddleware
         }
     }
 
+
     private static Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = ex switch
         {
+            DomainException => StatusCodes.Status400BadRequest,  
             ArgumentException => (int)HttpStatusCode.BadRequest,
             InvalidOperationException => (int)HttpStatusCode.Conflict,
             KeyNotFoundException => (int)HttpStatusCode.NotFound,

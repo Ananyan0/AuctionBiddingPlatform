@@ -1,7 +1,6 @@
-﻿using AuctionBiddingPlatform.Core.Interfaces.IRepositories;
-using AuctionBiddingPlatform.Core.Interfaces.IServices;
-using System.ComponentModel.DataAnnotations;
+﻿using AuctionBiddingPlatform.Core.Interfaces.IServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AuctionBiddingPlatform.Middlewares;
 
@@ -29,14 +28,32 @@ public class BiddingRulesMiddleware
                 var body = await reader.ReadToEndAsync();
                 context.Request.Body.Position = 0;
 
-                var data = JsonSerializer.Deserialize<BidBody>(body);
+
+                if (string.IsNullOrWhiteSpace(body))
+                    throw new ArgumentException("Invalid request body.");
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    NumberHandling = JsonNumberHandling.AllowReadingFromString
+                };
+
+                BidBody? data;
+                try
+                {
+                    data = JsonSerializer.Deserialize<BidBody>(body, options);
+                }
+                catch (JsonException)
+                {
+                    throw new ArgumentException("Invalid JSON in request body.");
+                }
+
                 if (data == null)
                     throw new ArgumentException("Invalid request body.");
 
                 await validator.ValidateAsync(itemId, data.Amount);
             }
         }
-
         await _next(context);
     }
 

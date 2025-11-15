@@ -4,5 +4,5 @@ namespace AuctionBiddingPlatform.Core.Interfaces.Messaging;
 
 public interface IMessagePublisher
 {
-    Task PublishAuctionClosedAsync(AuctionClosedEvent ev);
+    void PublishAuctionClosedAsync(AuctionClosedEvent ev);
 }

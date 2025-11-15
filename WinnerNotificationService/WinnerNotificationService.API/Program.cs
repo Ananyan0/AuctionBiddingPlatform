@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Buffers.Text;
-using System.Net.Http;
-using WinnerNotificationService.Application.Interfaces;
+﻿using WinnerNotificationService.Application.Interfaces;
 using WinnerNotificationService.Application.Services;
 using WinnerNotificationService.Infrastructure.Messaging;
 

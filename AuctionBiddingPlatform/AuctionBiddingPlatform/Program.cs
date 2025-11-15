@@ -59,22 +59,21 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 🔹 Required for [Authorize] attributes and policies
 builder.Services.AddAuthorization();
 
-// 4️⃣ AutoMapper
+// AutoMapper
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MappingProfile>();
 });
 
-// 5️⃣ Dependency Injection for Repositories & UnitOfWork
+// Dependency Injection for Repositories & UnitOfWork
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IAuctionItemRepository, AuctionItemRepository>();
 builder.Services.AddScoped<IBidRepository, BidRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// 6️⃣ Application Services
+// Application Services
 builder.Services.AddScoped<IAuctionItemService, AuctionItemService>();
 builder.Services.AddScoped<IBidService, BidService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -87,7 +86,6 @@ builder.Services.AddScoped<IBidValidationService, BidValidationService>();
 builder.Services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
 
 
-// 7️⃣ Controllers & Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -137,17 +135,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// 🔹 Global Exception Handler
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
-// 🔹 Authentication & Authorization must be in this order
 app.UseAuthentication();
 
 app.UseAuthorization();
 
-// 🔹 Custom Middleware for Bid Validation (runs after user is authenticated)
 app.UseMiddleware<BiddingRulesMiddleware>();
 
 app.MapControllers();

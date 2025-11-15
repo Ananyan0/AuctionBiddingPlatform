@@ -68,4 +68,23 @@ public class AuctionItemRepository : BaseRepository<AuctionItem>, IAuctionItemRe
 
         return (items, total);
     }
+
+    public async Task<AuctionItem?> GetByIdWithBidsAsync(int id)
+    {
+        var item =  await _context.AuctionItems
+            .Include(a => a.Bids)
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+        Console.WriteLine($"=== LOADED FROM DB ===");
+        Console.WriteLine($"Item ID: {item?.Id}");
+        Console.WriteLine($"Bids Count: {item?.Bids?.Count ?? 0}");
+        Console.WriteLine($"HighestBid from DB: {item?.HighestBid}");
+
+        item?.RecalculateHighestBid();
+
+        Console.WriteLine($"HighestBid after recalc: {item?.HighestBid}");
+        Console.WriteLine($"======================");
+
+        return item;
+    }
 }
