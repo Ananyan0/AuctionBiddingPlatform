@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36511.14 d17.14
+VisualStudioVersion = 17.14.36511.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuctionBiddingPlatform", "AuctionBiddingPlatform.csproj", "{5599F2A5-7182-4403-A30D-57EBCD1E2568}"
 EndProject
@@ -20,6 +20,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{50809ECD-5A2B-410E-8537-123EEF9257DF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auction.Contracts", "..\Auction.Contracts\Auction.Contracts.csproj", "{F5A2E6BA-0371-439E-BBD3-1F616A64DAAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuctionBiddingPlatform.Tests", "..\AuctionBiddingPlatform.Tests\AuctionBiddingPlatform.Tests.csproj", "{4A16A7AC-ECE4-4CD3-8915-758E48B4D369}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unit Tests", "Unit Tests", "{E619CABA-509C-46B8-8E78-8CB51862AF26}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +51,10 @@ Global
 		{F5A2E6BA-0371-439E-BBD3-1F616A64DAAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5A2E6BA-0371-439E-BBD3-1F616A64DAAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5A2E6BA-0371-439E-BBD3-1F616A64DAAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A16A7AC-ECE4-4CD3-8915-758E48B4D369}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A16A7AC-ECE4-4CD3-8915-758E48B4D369}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A16A7AC-ECE4-4CD3-8915-758E48B4D369}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A16A7AC-ECE4-4CD3-8915-758E48B4D369}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,6 +64,7 @@ Global
 		{D2E4F72B-0B56-4C7B-B68F-BB4ED55F9916} = {0946CFBA-06BC-4F7E-BED1-702CBA67132D}
 		{D86BD0A8-AD9E-4929-A169-CD4FBE1E5070} = {7C8F01D7-2E68-4D2D-9D46-35F726A51830}
 		{F5A2E6BA-0371-439E-BBD3-1F616A64DAAA} = {50809ECD-5A2B-410E-8537-123EEF9257DF}
+		{4A16A7AC-ECE4-4CD3-8915-758E48B4D369} = {E619CABA-509C-46B8-8E78-8CB51862AF26}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3C5D3FC0-754D-4CAA-9140-602A39F954D6}
